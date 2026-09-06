@@ -9,10 +9,14 @@ function simulate(shot: Shot) {
   }
   throw new Error('Throw never landed')
 }
-test('a well-aimed powerful throw clears the school and wins', () => {
-  const result = simulate({ direction: 0, trajectory: 48, power: 0.85 })
+test('a well-aimed full-power throw only just clears the school and wins', () => {
+  const result = simulate({ direction: 0, trajectory: 48, power: 0.72 })
   assert.equal(result.won, true)
   assert.ok(result.p.z < -45)
+  assert.ok(result.p.z > -48)
+})
+test('a medium-power throw reaches the school but does not clear it', () => {
+  assert.equal(simulate({ direction: 0, trajectory: 48, power: 0.6 }).hit, 'school')
 })
 test('a weak throw falls short', () => {
   assert.equal(simulate({ direction: 0, trajectory: 45, power: 0.15 }).won, false)

@@ -98,7 +98,7 @@ function Action({ game, sync, updateGame }: { game: GameControl; sync: () => voi
       g.meter = (Math.sin(timer.current * (g.phase === 'power' ? 3.1 : 1.9)) + 1) / 2
       if(g.phase === 'direction') g.shot.direction = (g.meter-0.5)*48
       if(g.phase === 'trajectory') g.shot.trajectory = 12+g.meter*64
-      if(g.phase === 'power') g.shot.power = 0.15+g.meter*0.85
+      if(g.phase === 'power') g.shot.power = 0.08+g.meter*0.64
       camTarget.set(8,17,23); camera.position.lerp(camTarget,1-Math.exp(-delta*3)); look.current.lerp(new THREE.Vector3(0,10,-17),1-Math.exp(-delta*3))
       for(let i=0;i<guide.current.children.length;i++) { const p=positionAt(g.shot,(i+1)*0.075); guide.current.children[i].position.set(p.x,p.y,p.z); guide.current.children[i].visible=p.y>0 }
       const t=positionAt(g.shot,0.7); target.current.position.set(t.x,11.7,t.z); target.current.rotation.y = -g.shot.direction*Math.PI/180

@@ -7,7 +7,9 @@ export const defaultShot: Shot = { direction: 0, trajectory: 45, power: 0.7 }
 export function positionAt(shot: Shot, time: number): Point {
   const yaw = shot.direction * Math.PI / 180
   const pitch = shot.trajectory * Math.PI / 180
-  const speed = 10 + 17 * shot.power
+  // The throw is deliberately tight: the top of the power meter should only
+  // just carry a centered cup beyond the far boundary.
+  const speed = 8 + 15 * shot.power
   return {
     x: START.x + Math.sin(yaw) * Math.cos(pitch) * speed * time,
     y: START.y + Math.sin(pitch) * speed * time - 4.905 * time * time,
