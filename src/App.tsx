@@ -31,6 +31,7 @@ export default function App() {
   const [help, setHelp] = useState(false)
   const [sound, setSound] = useState(false)
   const audio = useRef<AudioContext | null>(null)
+  const updateGame = useCallback((next: GameState) => { game.current = next }, [])
   const sync = useCallback(() => setState({ ...game.current, shot: { ...game.current.shot } }), [])
   const beep = useCallback((frequency = 480) => {
     if (!sound) return
@@ -86,7 +87,7 @@ export default function App() {
     <section className="game-shell" aria-label="Coffee cup throwing game">
       <div className="scene" onPointerDown={e => { if (e.button === 0) tap() }}>
         <Canvas shadows dpr={[1, 1.7]} camera={{ position: [8, 17, 23], fov: 47, near: 0.1, far: 250 }} gl={{ antialias: true, powerPreference: 'high-performance' }} fallback={<div className="webgl-fallback">This game needs WebGL. Try a browser with hardware acceleration enabled.</div>}>
-          <Scene game={game} sync={sync}/>
+          <Scene game={game} sync={sync} updateGame={updateGame}/>
         </Canvas>
       </div>
       <div className="scene-vignette"/>

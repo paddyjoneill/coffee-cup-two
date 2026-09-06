@@ -2,7 +2,7 @@ import { memo, useEffect, useMemo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { RoundedBox } from '@react-three/drei'
 import * as THREE from 'three'
-import type { GameControl } from './App'
+import type { GameControl, GameState } from './App'
 import { START, collisionAt, distanceAt, isWinningLanding, positionAt } from './physics'
 
 type V3 = [number, number, number]
@@ -83,7 +83,7 @@ function World() {
     <group position={[-19,0.4,-11]}><Box position={[0,0.6,0]} size={[3.4,1.05,1.65]} color="#e0b45f" round={0.28}/><Box position={[0.1,1.25,0]} size={[1.8,0.9,1.48]} color="#e8c677" round={0.22}/><Box position={[0.1,1.34,0.755]} size={[1.44,0.49,0.02]} color="#71918c"/>{[-1,1].flatMap(x=>[-0.81,0.81].map(z=><Cylinder key={`${x}-${z}`} position={[x,0.28,z]} args={[0.35,0.35,0.17,16]} rotation={[Math.PI/2,0,0]} color="#4b554b"/>))}</group>
   </group>
 }
-function Action({ game, sync }: { game: GameControl; sync: () => void }) {
+function Action({ game, sync, updateGame }: { game: GameControl; sync: () => void; updateGame: (next: GameState) => void }) {
   const cup = useRef<THREE.Group>(null!), guide = useRef<THREE.Group>(null!), target = useRef<THREE.Group>(null!)
   const timer = useRef(0), flightTime = useRef(0), lastPhase = useRef(''), lastAttempt = useRef(0), lastSync = useRef(0)
   const look = useRef(new THREE.Vector3(0,10,-17)), camTarget = useMemo(()=>new THREE.Vector3(),[])
@@ -112,10 +112,16 @@ function Action({ game, sync }: { game: GameControl; sync: () => void }) {
       }
       cup.current.rotation.x += delta*5; cup.current.rotation.z += delta*2
     }
-    if(!aiming) { const p=cup.current.position; camTarget.set(p.x+7,Math.max(6,p.y+4),p.z+13); camera.position.lerp(camTarget,1-Math.exp(-delta*3)); look.current.lerp(new THREE.Vector3(p.x,Math.max(1,p.y),p.z-2),1-Math.exp(-delta*5)) }
+    if(!aiming) {
+      const p = cup.current.position
+      // Follow from above with a slight forward angle to show the landing area.
+      camTarget.set(p.x + 3, p.y + 22, p.z + 8)
+      camera.position.lerp(camTarget, 1 - Math.exp(-delta * 3))
+      look.current.lerp(new THREE.Vector3(p.x, Math.max(1, p.y), p.z - 2), 1 - Math.exp(-delta * 5))
+    }
     cup.current.visible=!aiming; guide.current.visible=aiming; target.current.visible=aiming
     camera.lookAt(look.current)
-    game.current = g
+    updateGame(g)
     lastSync.current += delta; if(lastSync.current>0.04){ lastSync.current=0; sync() }
   })
   return <><group ref={cup} position={[START.x,START.y,START.z]} visible={false}><Cup/></group><group ref={guide}>{Array.from({length:24},(_,i)=><mesh key={i}><sphereGeometry args={[0.085+i*0.004,8,6]}/><meshBasicMaterial color="#fff1c9" transparent opacity={1-i/35}/></mesh>)}</group><group ref={target}><mesh rotation={[-Math.PI/2,0,0]}><ringGeometry args={[0.55,0.59,40]}/><meshBasicMaterial color="#fff1c9" transparent opacity={0.7} side={THREE.DoubleSide}/></mesh></group></>
@@ -123,6 +129,6 @@ function Action({ game, sync }: { game: GameControl; sync: () => void }) {
 const StaticWorld = memo(World)
 const StaticSchool = memo(School)
 const StaticOffice = memo(Office)
-export function Scene({ game, sync }: { game: GameControl; sync: () => void }) {
-  return <><color attach="background" args={['#dde2cf']}/><fog attach="fog" args={['#dde2cf',65,160]}/><ambientLight intensity={0.9}/><hemisphereLight args={['#fff9df','#a5af91',1.5]}/><directionalLight position={[-25,40,20]} intensity={2.5} castShadow shadow-mapSize={[2048,2048]} shadow-camera-left={-60} shadow-camera-right={60} shadow-camera-top={60} shadow-camera-bottom={-60} shadow-camera-far={150} shadow-normalBias={0.045}/><StaticWorld/><StaticSchool/><StaticOffice/><Character game={game}/><Action game={game} sync={sync}/></>
+export function Scene({ game, sync, updateGame }: { game: GameControl; sync: () => void; updateGame: (next: GameState) => void }) {
+  return <><color attach="background" args={['#dde2cf']}/><fog attach="fog" args={['#dde2cf',65,160]}/><ambientLight intensity={0.9}/><hemisphereLight args={['#fff9df','#a5af91',1.5]}/><directionalLight position={[-25,40,20]} intensity={2.5} castShadow shadow-mapSize={[2048,2048]} shadow-camera-left={-60} shadow-camera-right={60} shadow-camera-top={60} shadow-camera-bottom={-60} shadow-camera-far={150} shadow-normalBias={0.045}/><StaticWorld/><StaticSchool/><StaticOffice/><Character game={game}/><Action game={game} sync={sync} updateGame={updateGame}/></>
 }
