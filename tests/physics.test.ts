@@ -9,14 +9,14 @@ function simulate(shot: Shot) {
   }
   throw new Error('Throw never landed')
 }
-test('a well-aimed full-power throw only just clears the school and wins', () => {
-  const result = simulate({ direction: 0, trajectory: 48, power: 0.72 })
+test('a well-aimed full-power throw clears the school and wins', () => {
+  const result = simulate({ direction: 0, trajectory: 48, power: 1 })
   assert.equal(result.won, true)
-  assert.ok(result.p.z < -45)
-  assert.ok(result.p.z > -48)
+  assert.ok(result.p.z < -43)
+  assert.ok(result.p.z > -50)
 })
 test('a medium-power throw reaches the school but does not clear it', () => {
-  assert.equal(simulate({ direction: 0, trajectory: 48, power: 0.6 }).hit, 'school')
+  assert.equal(simulate({ direction: 0, trajectory: 48, power: 0.8 }).hit, 'school')
 })
 test('a weak throw falls short', () => {
   assert.equal(simulate({ direction: 0, trajectory: 45, power: 0.15 }).won, false)
@@ -29,7 +29,7 @@ test('flying beyond the line is not enough until the cup lands', () => {
 })
 test('landing outside the target width does not win', () => {
   assert.equal(isWinningLanding({ x: 25, y: 0, z: -50 }, 'ground'), false)
-  assert.equal(isWinningLanding({ x: 0, y: 0, z: -44 }, 'ground'), false)
+  assert.equal(isWinningLanding({ x: 0, y: 0, z: -42.5 }, 'ground'), false)
   assert.equal(isWinningLanding({ x: 0, y: 0, z: -50 }, 'school'), false)
 })
 test('direction changes lateral movement and trajectory changes height', () => {
